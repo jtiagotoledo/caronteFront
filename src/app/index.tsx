@@ -1,12 +1,14 @@
 import { View, Text, TouchableHighlight, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
-import { iniciarBanco, salvarAtivo, buscarAtivos } from '@/db/database';
+import { iniciarBanco, salvarOperacao, buscarOperacoes } from '@/db/database';
 import obterCotacao from '../services/brapiService'
 
 export default function HomeScreen() {
 
   const [ticker, setTicker] = useState('');
-  const [preco, setPreco] = useState('');
+  const [quantidade, setQuantidade] = useState('');
+  const [dataCompra, setDataCompra] = useState('');
+  const [valorCompra, setValorCompra] = useState('');
   const [naoExisteTicker, setNaoExisteTicker] = useState(false);
 
   useEffect(()=>{
@@ -14,7 +16,7 @@ export default function HomeScreen() {
   },[]);
 
   const carregarDados = ()=>{
-    const ativos = buscarAtivos();
+    const ativos = buscarOperacoes();
     console.log('listaDeAtivos', ativos);
   }
   
@@ -25,9 +27,9 @@ export default function HomeScreen() {
     console.log('dados', dados);
   }
 
-  const salvarNoBanco = async (ticker:string, preco:string) => {
-    console.log('ticker e preço', ticker, preco);
-    salvarAtivo(ticker.toUpperCase(),parseFloat(preco))
+  const salvarNoBanco = async (ticker:string, quantidade:string, dataCompra: string, valorCompra:string) => {
+    console.log('ticker e preço', ticker, quantidade, dataCompra, valorCompra);
+    salvarOperacao(ticker.toUpperCase(),parseInt(quantidade), dataCompra, parseFloat(valorCompra))
   }
 
   return (
@@ -42,15 +44,25 @@ export default function HomeScreen() {
       />
       <TextInput
         className='border mt-4 text-center w-48'
-        placeholder='Digite o preço'
-        onChangeText={(text)=>setPreco(text)}
+        placeholder='Digite a quantidade'
+        onChangeText={(text)=>setQuantidade(text)}
+      />
+      <TextInput
+        className='border mt-4 text-center w-48'
+        placeholder='Digite a data da compra'
+        onChangeText={(text)=>setDataCompra(text)}
+      />
+      <TextInput
+        className='border mt-4 text-center w-48'
+        placeholder='Digite o valor da compra'
+        onChangeText={(text)=>setValorCompra(text)}
       />
       <TouchableHighlight onPress={()=>pegarCotacao(ticker)}>
         <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
           Pegar Cotação 
         </Text>
       </TouchableHighlight>
-      <TouchableHighlight onPress={()=>salvarNoBanco(ticker,preco)}>
+      <TouchableHighlight onPress={()=>salvarNoBanco(ticker,quantidade, dataCompra, valorCompra)}>
         <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
           Salvar dados
         </Text>

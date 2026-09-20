@@ -4,26 +4,36 @@ const db = SQLite.openDatabaseSync("caronte.db");
 
 export function iniciarBanco() {
     db.execSync(`
-    CREATE TABLE IF NOT EXISTS ativos (
-        id INTEGER  PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS operacoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         ticker TEXT NOT NULL,
-        preco REAL NOT NULL
-    );   
+        qnt_papeis INTEGER NOT NULL,
+        data_compra TEXT NOT NULL,
+        valor_compra REAL NOT NULL,
+        data_venda TEXT,
+        valor_venda REAL
+    );
+    
+    CREATE TABLE IF NOT EXISTS dividendos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        operacoes_id INTEGER NOT NULL,
+        valor REAL NOT NULL,
+        data_pagamento TEXT NOT NULL,
+        FOREIGN KEY (operacoes_id) REFERENCES operacoes (id) ON DELETE CASCADE
+    );
     `);
-    console.log('banco criado com sucesso');
 }
 
-export function salvarAtivo(ativo: string, preco: number) {
+export function salvarOperacao(ticker: string, quantidade: number, dataCompra: string, valorCompra:number) {
     db.runSync(
-        "INSERT INTO ativos(ticker, preco) VALUES (?, ?);",
-        [ativo, preco]
+        "INSERT INTO operacoes(ticker, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?);",
+        [ticker, quantidade, dataCompra, valorCompra]
     );
-    console.log('dados salvos');
     
 }
 
-export function buscarAtivos() {
+export function buscarOperacoes() {
     return db.getAllSync<{id:number,ativo:string,preco:number}>(
-        "SELECT * FROM ativos ORDER BY id DESC;",
+        "SELECT * FROM operacoes ORDER BY id DESC;",
     );
 }
