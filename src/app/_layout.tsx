@@ -12,6 +12,9 @@ export default function TabLayout() {
   }, []);
 
   return (
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" options={{title:'Início'}}/>
+        <Stack.Screen name="add" options={{title:'Add posição'}}/>
+      </Stack>
   );
 }
