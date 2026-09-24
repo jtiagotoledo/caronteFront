@@ -1,10 +1,10 @@
-import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { iniciarBanco, buscarOperacoes } from '@/db/database';
+import { iniciarBanco, buscarOperacoes, Operacao } from '@/db/database';
 import obterCotacao from '../services/brapiService'
 
 export default function HomeScreen() {
@@ -13,16 +13,15 @@ export default function HomeScreen() {
 
   const [ticker, setTicker] = useState('');
   const [_, setNaoExisteTicker] = useState(false);
+  const [operacoes, setOperacoes] = useState<Operacao[]>([]);
 
   useEffect(() => {
     iniciarBanco();
-    carregarDados();
+    const dados = buscarOperacoes();
+    setOperacoes(dados);
   }, []);
 
-  const carregarDados = () => {
-    const ativos = buscarOperacoes();
-    console.log('listaDeAtivos', ativos);
-  }
+  
 
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
@@ -55,7 +54,15 @@ export default function HomeScreen() {
       </View>
 
       {/* componente */}
-      <View className="flex-1 items-center justify-center bg-zinc-100">
+      <FlatList
+        data={operacoes}
+        keyExtractor={(item)=>item.id.toString()}
+        renderItem={({item})=><Text>{item.ticker}</Text>}
+      />
+
+
+
+      {/* <View className="flex-1 items-center justify-center bg-zinc-100">
         
         <TextInput
           className='border mt-4 text-center w-48'
@@ -67,8 +74,7 @@ export default function HomeScreen() {
             Pegar Cotação
           </Text>
         </TouchableHighlight>
-      </View>
-
+      </View> */}
     </View>
   );
 }
