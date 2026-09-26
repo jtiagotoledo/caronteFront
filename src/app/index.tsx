@@ -1,52 +1,119 @@
-import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, FlatList, Pressable, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
-import { iniciarBanco, buscarOperacoes, Operacao } from '@/db/database';
+import { iniciarBanco, buscarOperacoes, deletarOperacao, Operacao } from '@/db/database';
 import obterCotacao from '../services/brapiService'
 
 export default function HomeScreen() {
+
+  interface CotacaoInfo {
+    logourl: string;
+    longName: string;
+  }
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const [ticker, setTicker] = useState('');
+  const [cotacoes, setCotacoes] = useState<Record<string, CotacaoInfo>>({});
   const [_, setNaoExisteTicker] = useState(false);
   const [operacoes, setOperacoes] = useState<Operacao[]>([]);
 
   useEffect(() => {
-    iniciarBanco();
-    const dados = buscarOperacoes();
-    setOperacoes(dados);
+    async function carregarDados() {
+      iniciarBanco();
+      const operacoes = buscarOperacoes();
+      setOperacoes(operacoes);
+      console.log('operacoes', operacoes);
+
+      let cotacoes: Record<string, CotacaoInfo> = {}
+      for (const op of operacoes) {
+        const cotacao = await pegarCotacao(op.ticker);
+        if (cotacao) {
+          cotacoes[op.ticker] = {
+            logourl: cotacao.data.logourl,
+            longName: cotacao.data.longName,
+          }
+        }
+      }
+      setCotacoes(cotacoes);
+    }
+    carregarDados();
   }, []);
 
-  
+  const onLongPressOperacao = (id: number) => {
+    const deleteOk = deletarOperacao(id);
+    if (deleteOk) {
+      Alert.alert('Operação deletada com sucesso.');
+    } else {
+      Alert.alert('Não foi possível excluir a operação.');
+    }
+  }
 
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
     const dados = await obterCotacao(ticker);
-    if (!dados) setNaoExisteTicker(true);
-    console.log('dados', dados);
+    if (!dados) {
+      setNaoExisteTicker(true);
+      return null;
+    }
+    return dados;
+  }
+
+  const rendeItemOperacao = (item: Operacao, cotacoes: any) => {
+    const cotacao = cotacoes[item.ticker];
+    const itemCompleto = {
+      ...item,
+      logourl: cotacao?.logourl,
+      longName: cotacao?.longName,
+    }
+    console.log('itemCompleto', itemCompleto);
+
+
+    return (
+      <Pressable
+        className='bg-white h-28 w-full px-4 mb-3 rounded-xl justify-center border border-zinc-200'
+        onLongPress={() => onLongPressOperacao(itemCompleto.id)}
+      >
+        <View className='flex-row items-center'>
+          <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
+            <Image
+              source={itemCompleto.logourl}
+              style={{ width: 40, height: 40 }}
+              contentFit="contain" 
+              transition={200}
+            />
+          </View>
+
+          <View>
+            <Text className='text-amber-600 text-2xl'>{itemCompleto.ticker}</Text>
+            <Text className='text-zinc-400 text-sm'>Compra {itemCompleto.qnt_papeis} | {itemCompleto.valor_compra}</Text>
+          </View>
+        </View>
+      </Pressable>
+    );
   }
 
   return (
-    <View className='flex-1'>
+    <View className='flex-1 bg-zinc-100'>
 
       {/* toolbar */}
-      <View style={{ paddingTop: insets.top }} className='flex-row items-center justify-between h-28 bg-cyan-500 px-4'>
-        
+      <View style={{ paddingTop: insets.top }} className='flex-row items-center justify-between h-28 bg-slate-900 px-4'>
+
         <View className='flex-row items-center'>
           <Ionicons name='menu' size={24} color='white' />
         </View>
 
         <View className='flex-row items-center '>
-          <Text className='text-white text-2xl'>Caronte Invest</Text>
+          <Text className='text-amber-600 text-2xl'>Caronte Invest</Text>
         </View>
 
         <TouchableWithoutFeedback
           className='flex-row items-center'
-          onPress={()=>router.replace('./add')}
+          onPress={() => router.replace('./add')}
         >
           <Ionicons name='add-circle' size={24} color='white' />
         </TouchableWithoutFeedback>
@@ -56,11 +123,10 @@ export default function HomeScreen() {
       {/* componente */}
       <FlatList
         data={operacoes}
-        keyExtractor={(item)=>item.id.toString()}
-        renderItem={({item})=><Text>{item.ticker}</Text>}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
+        renderItem={({ item }) => rendeItemOperacao(item, cotacoes)}
       />
-
-
 
       {/* <View className="flex-1 items-center justify-center bg-zinc-100">
         

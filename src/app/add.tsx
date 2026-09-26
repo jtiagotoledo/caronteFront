@@ -1,4 +1,4 @@
-import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,7 +11,6 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
 
   const [ticker, setTicker] = useState('');
   const [quantidade, setQuantidade] = useState('');
@@ -37,15 +36,21 @@ export default function HomeScreen() {
 
   const salvarNoBanco = async (ticker: string, quantidade: string, dataCompra: string, valorCompra: string) => {
     console.log('ticker e preço', ticker, quantidade, dataCompra, valorCompra);
-    salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, parseFloat(valorCompra))
+    const salvarOk = salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, parseFloat(valorCompra));
+    if (salvarOk) {
+      Alert.alert('Operação salva com sucesso.');
+    } else {
+      Alert.alert('Não foi possível salvar a operação.');
+    }
+    router.replace('./');
   }
 
   return (
-    <View className='flex-1'>
+    <View className='flex-1 bg-zinc-100'>
 
       {/* toolbar */}
-      <View style={{ paddingTop: insets.top }} className='flex-row items-center justify-between h-28 bg-cyan-500 px-4'>
-        
+      <View style={{ paddingTop: insets.top }} className='flex-row items-center justify-between h-28 bg-slate-900 px-4'>
+
         <TouchableWithoutFeedback
           className='flex-row items-center'
           onPress={() => router.replace('./')}
@@ -54,7 +59,7 @@ export default function HomeScreen() {
         </TouchableWithoutFeedback>
 
         <View className='flex-row items-center '>
-          <Text className='text-white text-2xl'>Adicionar Operação</Text>
+          <Text className='text-amber-600 text-2xl'>Adicionar Operação</Text>
         </View>
 
         <View className='w-10' />
