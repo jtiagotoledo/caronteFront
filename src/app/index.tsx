@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 import { iniciarBanco, buscarOperacoes, deletarOperacao, Operacao } from '@/db/database';
-import obterCotacao from '../services/brapiService'
+import { obterCotacao } from '../services/brapiService'
 
 export default function HomeScreen() {
 
@@ -75,7 +75,7 @@ export default function HomeScreen() {
 
     return (
       <Pressable
-        className='bg-white h-28 w-full px-4 mb-3 rounded-xl justify-center border border-zinc-200'
+        className='bg-white h-28 w-full px-4 mb-2 rounded-xl justify-center border border-zinc-200'
         onLongPress={() => onLongPressOperacao(itemCompleto.id)}
       >
         <View className='flex-row items-center'>
@@ -83,7 +83,7 @@ export default function HomeScreen() {
             <Image
               source={itemCompleto.logourl}
               style={{ width: 40, height: 40 }}
-              contentFit="contain" 
+              contentFit="contain"
               transition={200}
             />
           </View>
@@ -128,19 +128,6 @@ export default function HomeScreen() {
         renderItem={({ item }) => rendeItemOperacao(item, cotacoes)}
       />
 
-      {/* <View className="flex-1 items-center justify-center bg-zinc-100">
-        
-        <TextInput
-          className='border mt-4 text-center w-48'
-          placeholder='Digite o tiker aqui'
-          onChangeText={(text) => setTicker(text)}
-        />
-        <TouchableHighlight onPress={() => pegarCotacao(ticker)}>
-          <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
-            Pegar Cotação
-          </Text>
-        </TouchableHighlight>
-      </View> */}
     </View>
   );
 }

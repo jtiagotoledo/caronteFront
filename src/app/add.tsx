@@ -1,42 +1,29 @@
-import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback, Alert } from 'react-native';
-import { useState, useEffect } from 'react';
+import { View, Text, TouchableHighlight, TextInput, TouchableWithoutFeedback, Alert, FlatList, Pressable } from 'react-native';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 
-import { iniciarBanco, salvarOperacao, buscarOperacoes } from '@/db/database';
-import obterCotacao from '../services/brapiService'
+import { salvarOperacao, } from '@/db/database';
+import { pesquisaPorTicker, ItemPesquisa } from '../services/brapiService'
 
 export default function HomeScreen() {
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const [ticker, setTicker] = useState('');
+  const [ticker, setTicker] = useState<ItemPesquisa | null>(null);
   const [quantidade, setQuantidade] = useState('');
   const [dataCompra, setDataCompra] = useState('');
   const [valorCompra, setValorCompra] = useState('');
-  const [naoExisteTicker, setNaoExisteTicker] = useState(false);
+  const [listaTickers, setListaTickers] = useState<ItemPesquisa[]>([])
 
-  useEffect(() => {
-    iniciarBanco();
-  }, []);
-
-  const carregarDados = () => {
-    const ativos = buscarOperacoes();
-    console.log('listaDeAtivos', ativos);
-  }
-
-  const pegarCotacao = async (ticker: string) => {
-    setNaoExisteTicker(false)
-    const dados = await obterCotacao(ticker);
-    if (!dados) setNaoExisteTicker(true);
-    console.log('dados', dados);
-  }
 
   const salvarNoBanco = async (ticker: string, quantidade: string, dataCompra: string, valorCompra: string) => {
-    console.log('ticker e preço', ticker, quantidade, dataCompra, valorCompra);
-    const salvarOk = salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, parseFloat(valorCompra));
+    const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
+
+    const salvarOk = salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, valorCompraNormatizado);
     if (salvarOk) {
       Alert.alert('Operação salva com sucesso.');
     } else {
@@ -44,6 +31,46 @@ export default function HomeScreen() {
     }
     router.replace('./');
   }
+
+  const onChangeTicker = async (tickerSearch: string) => {
+    const resultadoPesquisa = await pesquisaPorTicker(tickerSearch);
+    setListaTickers(resultadoPesquisa);
+  }
+
+  const selecionarTicker = (item: ItemPesquisa) => {
+    setTicker(item);
+  }
+
+  const rendeItemPesquisa = (item: ItemPesquisa) => {
+    return (
+      <Pressable
+        className="bg-white p-3 mb-2 rounded-xl border border-zinc-200 flex-row items-center"
+        onPress={() => selecionarTicker(item)}
+      >
+        <View className="w-10 h-20 mr-3 items-center justify-center overflow-hidden">
+          <Image
+            source={item.logoUrl}
+            style={{ width: 40, height: 40 }}
+            contentFit="contain"
+          />
+        </View>
+
+        <View className="flex-1 justify-center">
+          <Text className="text-2xl font-bold text-amber-600">
+            {item.ticker}
+          </Text>
+
+          <Text
+            className="text-xs text-zinc-500"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {item.nome}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  };
 
   return (
     <View className='flex-1 bg-zinc-100'>
@@ -67,46 +94,67 @@ export default function HomeScreen() {
       </View>
 
       {/* componente */}
-      <View className="flex-1 items-center justify-center bg-zinc-100">
-        <TextInput
-          className='border mt-4 text-center w-48'
-          placeholder='Digite o tiker aqui'
-          onChangeText={(text) => setTicker(text)}
-        />
-        <TextInput
-          className='border mt-4 text-center w-48'
-          placeholder='Digite a quantidade'
-          onChangeText={(text) => setQuantidade(text)}
-        />
-        <TextInput
-          className='border mt-4 text-center w-48'
-          placeholder='Digite a data da compra'
-          onChangeText={(text) => setDataCompra(text)}
-        />
-        <TextInput
-          className='border mt-4 text-center w-48'
-          placeholder='Digite o valor da compra'
-          onChangeText={(text) => setValorCompra(text)}
-        />
-        <TouchableHighlight onPress={() => pegarCotacao(ticker)}>
-          <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
-            Pegar Cotação
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => salvarNoBanco(ticker, quantidade, dataCompra, valorCompra)}>
-          <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
-            Salvar dados
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => carregarDados()}>
-          <Text className='bg-zinc-400 rounded-md p-2 text-zinc-100 mt-4'>
-            Buscar Ativos
-          </Text>
-        </TouchableHighlight>
-        {naoExisteTicker &&
-          <Text className='text-cyan-500 mt-4'>Ativo não existe</Text>
-        }
-      </View>
+      {!ticker &&
+        <View>
+          <View className="flex-row items-center bg-zinc-100 p-4 border border-zinc-200">
+            <Ionicons name='search' size={30} color='black' className='mr-4' />
+            <TextInput
+              className='flex-1 text-2xl text-amber-600'
+              placeholder='Digite o tiker aqui'
+              onChangeText={(text) => onChangeTicker(text)}
+              keyboardType="visible-password"
+            />
+
+          </View>
+          <FlatList
+            data={listaTickers}
+            keyExtractor={(item) => item.ticker}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
+            renderItem={({ item }) => rendeItemPesquisa(item)}
+          />
+        </View>
+      }
+
+      {ticker &&
+
+        <View className="flex-1 items-center justify-center bg-zinc-100 p-4">
+          <View className="w-24 h-24 items-center justify-center overflow-hidden mb-4">
+            <Image
+              source={ticker.logoUrl}
+              style={{ width: 80, height: 80 }}
+              contentFit="contain"
+            />
+          </View>
+          <View className="justify-center mb-10">
+            <Text className="text-2xl font-bold text-amber-600">
+              {ticker.ticker}
+            </Text>
+          </View>
+
+          <TextInput
+            className='border mt-4 text-center w-full rounded-xl'
+            placeholder='Digite a quantidade'
+            onChangeText={(text) => setQuantidade(text)}
+            inputMode='numeric'
+          />
+          <TextInput
+            className='border mt-4 text-center w-full rounded-xl'
+            placeholder='Digite a data da compra'
+            onChangeText={(text) => setDataCompra(text)}
+          />
+          <TextInput
+            className='border mt-4 text-center w-full rounded-xl'
+            placeholder='Digite o valor da compra'
+            onChangeText={(text) => setValorCompra(text)}
+          />
+
+          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, quantidade, dataCompra, valorCompra)}>
+            <Text className='bg-slate-900 rounded-md text-xl text-amber-600 p-4 mt-8'>
+              SALVAR OPERAÇÃO
+            </Text>
+          </TouchableHighlight>
+        </View>
+      }
     </View>
   );
 }
