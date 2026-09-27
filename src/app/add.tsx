@@ -22,8 +22,14 @@ export default function HomeScreen() {
   const [dataBanco, setDataBanco] = useState(new Date().toISOString().split("T")[0]);
 
   const salvarNoBanco = async (ticker: string, quantidade: string, dataCompra: string, valorCompra: string) => {
-    const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
+    
+    if(quantidade===''||valorCompra===''){
+      Alert.alert('A quantidade de papéis e o preço são obrigatórios!');
+      return;
+    }
 
+    const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
+    
     const salvarOk = salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, valorCompraNormatizado);
     if (salvarOk) {
       Alert.alert('Operação salva com sucesso.');
@@ -31,6 +37,7 @@ export default function HomeScreen() {
       Alert.alert('Não foi possível salvar a operação.');
     }
     router.replace('./');
+    
   }
 
   const onChangeTicker = async (tickerSearch: string) => {
@@ -156,6 +163,7 @@ export default function HomeScreen() {
             placeholder='Preço por papel'
             placeholderTextColor='#000000'
             onChangeText={(text) => setValorCompra(text)}
+            inputMode='numeric'
           />
 
           <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, quantidade, dataBanco, valorCompra)}>
