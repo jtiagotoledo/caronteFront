@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 
 import { salvarOperacao, } from '@/db/database';
 import { pesquisaPorTicker, ItemPesquisa } from '../services/brapiService'
+import { CampoData } from "../components/campoData";
 
 export default function HomeScreen() {
 
@@ -15,10 +16,10 @@ export default function HomeScreen() {
 
   const [ticker, setTicker] = useState<ItemPesquisa | null>(null);
   const [quantidade, setQuantidade] = useState('');
-  const [dataCompra, setDataCompra] = useState('');
   const [valorCompra, setValorCompra] = useState('');
-  const [listaTickers, setListaTickers] = useState<ItemPesquisa[]>([])
-
+  const [listaTickers, setListaTickers] = useState<ItemPesquisa[]>([]);
+  const [dataOperacao, setDataOperacao] = useState(new Date());
+  const [dataBanco, setDataBanco] = useState(new Date().toISOString().split("T")[0]);
 
   const salvarNoBanco = async (ticker: string, quantidade: string, dataCompra: string, valorCompra: string) => {
     const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
@@ -117,7 +118,7 @@ export default function HomeScreen() {
 
       {ticker &&
 
-        <View className="flex-1 items-center justify-center bg-zinc-100 p-4">
+        <View className="flex-1 items-center bg-zinc-100 p-4">
           <View className="w-24 h-24 items-center justify-center overflow-hidden mb-4">
             <Image
               source={ticker.logoUrl}
@@ -131,28 +132,38 @@ export default function HomeScreen() {
             </Text>
           </View>
 
+          <CampoData
+            label="Data da compra"
+            dataSelecionada={dataOperacao}
+            aoMudarData={(formatoBanco, objetoData) => {
+              setDataBanco(formatoBanco);
+              setDataOperacao(objetoData);
+              console.log('formatoBanco,objetoData',formatoBanco,objetoData);
+              
+            }}
+          />
+
           <TextInput
-            className='border mt-4 text-center w-full rounded-xl'
-            placeholder='Digite a quantidade'
+            className='border border-slate-700 mt-4 p-4 w-full rounded-xl text-base'
+            placeholder='Quantos papéis?'
+            placeholderTextColor='#000000'
             onChangeText={(text) => setQuantidade(text)}
             inputMode='numeric'
           />
+
           <TextInput
-            className='border mt-4 text-center w-full rounded-xl'
-            placeholder='Digite a data da compra'
-            onChangeText={(text) => setDataCompra(text)}
-          />
-          <TextInput
-            className='border mt-4 text-center w-full rounded-xl'
-            placeholder='Digite o valor da compra'
+            className='border border-slate-700 mt-4 p-4 w-full rounded-xl text-base'
+            placeholder='Preço por papel'
+            placeholderTextColor='#000000'
             onChangeText={(text) => setValorCompra(text)}
           />
 
-          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, quantidade, dataCompra, valorCompra)}>
-            <Text className='bg-slate-900 rounded-md text-xl text-amber-600 p-4 mt-8'>
+          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, quantidade, dataBanco, valorCompra)}>
+            <Text className='bg-slate-900 rounded-md text-sm text-white p-4 mt-8'>
               SALVAR OPERAÇÃO
             </Text>
           </TouchableHighlight>
+
         </View>
       }
     </View>
