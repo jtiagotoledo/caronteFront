@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const [dataOperacao, setDataOperacao] = useState(new Date());
   const [dataBanco, setDataBanco] = useState(new Date().toISOString().split("T")[0]);
 
-  const salvarNoBanco = async (ticker: string, quantidade: string, dataCompra: string, valorCompra: string) => {
+  const salvarNoBanco = async (ticker: string, nome:string, logoUrl:string, quantidade: string, dataCompra: string, valorCompra: string) => {
     
     if(quantidade===''||valorCompra===''){
       Alert.alert('A quantidade de papéis e o preço são obrigatórios!');
@@ -30,14 +30,14 @@ export default function HomeScreen() {
 
     const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
     
-    const salvarOk = salvarOperacao(ticker.toUpperCase(), parseInt(quantidade), dataCompra, valorCompraNormatizado);
+    const salvarOk = salvarOperacao(ticker.toUpperCase(), nome, logoUrl, parseInt(quantidade), dataCompra, valorCompraNormatizado);
     if (salvarOk) {
       Alert.alert('Operação salva com sucesso.');
     } else {
       Alert.alert('Não foi possível salvar a operação.');
     }
     router.replace('./');
-    
+
   }
 
   const onChangeTicker = async (tickerSearch: string) => {
@@ -166,7 +166,7 @@ export default function HomeScreen() {
             inputMode='numeric'
           />
 
-          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, quantidade, dataBanco, valorCompra)}>
+          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, ticker.nome, ticker.logoUrl, quantidade, dataBanco, valorCompra)}>
             <Text className='bg-slate-900 rounded-md text-sm text-white p-4 mt-8'>
               SALVAR OPERAÇÃO
             </Text>

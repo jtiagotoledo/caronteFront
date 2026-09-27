@@ -4,7 +4,7 @@ export interface ItemPesquisa {
     logoUrl: string;
 }
 
-export async function obterCotacao(ticker: string) {
+export async function obterInfoTicker(ticker: string) {
     const token = '7cNBdwS5P8EqD1SsRctziv';
     const url = `https://brapi.dev/api/v2/stocks/quote?symbols=${ticker}`
 

@@ -17,6 +17,8 @@ export function iniciarBanco() {
     CREATE TABLE IF NOT EXISTS operacoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ticker TEXT NOT NULL,
+        nome TEXT,
+        logo_url TEXT,
         qnt_papeis INTEGER NOT NULL,
         data_compra TEXT NOT NULL,
         valor_compra REAL NOT NULL,
@@ -34,10 +36,10 @@ export function iniciarBanco() {
     `);
 }
 
-export function salvarOperacao(ticker: string, quantidade: number, dataCompra: string, valorCompra: number) {
+export function salvarOperacao(ticker: string, nome:string, logo_url:string, quantidade: number, dataCompra: string, valorCompra: number) {
     const resultado = db.runSync(
-        "INSERT INTO operacoes(ticker, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?);",
-        [ticker, quantidade, dataCompra, valorCompra]
+        "INSERT INTO operacoes(ticker, nome, logo_url, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?, ?, ?);",
+        [ticker, nome, logo_url, quantidade, dataCompra, valorCompra]
     );
     return resultado.changes>0;
 }

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 import { iniciarBanco, buscarOperacoes, deletarOperacao, Operacao } from '@/db/database';
-import { obterCotacao } from '../services/brapiService'
+import { obterInfoTicker } from '../services/brapiService'
 
 export default function HomeScreen() {
 
@@ -55,7 +55,7 @@ export default function HomeScreen() {
 
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
-    const dados = await obterCotacao(ticker);
+    const dados = await obterInfoTicker(ticker);
     if (!dados) {
       setNaoExisteTicker(true);
       return null;
