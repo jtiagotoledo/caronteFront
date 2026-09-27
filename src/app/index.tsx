@@ -11,8 +11,9 @@ import { obterInfoTicker } from '../services/brapiService'
 export default function HomeScreen() {
 
   interface CotacaoInfo {
-    logourl: string;
-    longName: string;
+    cotacaoAtual: number;
+    variacao: number;
+    variacaoPercent: number;
   }
 
   const router = useRouter();
@@ -27,15 +28,15 @@ export default function HomeScreen() {
       iniciarBanco();
       const operacoes = buscarOperacoes();
       setOperacoes(operacoes);
-      console.log('operacoes', operacoes);
 
       let cotacoes: Record<string, CotacaoInfo> = {}
       for (const op of operacoes) {
         const cotacao = await pegarCotacao(op.ticker);
         if (cotacao) {
           cotacoes[op.ticker] = {
-            logourl: cotacao.data.logourl,
-            longName: cotacao.data.longName,
+            cotacaoAtual: cotacao.data.regularMarketPrice,
+            variacao: cotacao.data.regularMarketChange,
+            variacaoPercent: cotacao.data.regularMarketChangePercent,
           }
         }
       }
@@ -56,6 +57,8 @@ export default function HomeScreen() {
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
     const dados = await obterInfoTicker(ticker);
+    console.log('dados', dados);
+
     if (!dados) {
       setNaoExisteTicker(true);
       return null;
@@ -67,21 +70,22 @@ export default function HomeScreen() {
     const cotacao = cotacoes[item.ticker];
     const itemCompleto = {
       ...item,
-      logourl: cotacao?.logourl,
-      longName: cotacao?.longName,
+      cotacaoAtual: cotacao?.cotacaoAtual,
+      variacao: cotacao?.variacao,
+      variacaoPercent: cotacao?.variacaoPercent,
     }
     console.log('itemCompleto', itemCompleto);
 
 
     return (
       <Pressable
-        className='bg-white h-28 w-full px-4 mb-2 rounded-xl justify-center border border-zinc-200'
+        className='flex-row bg-white h-28 w-full px-4 mb-2 rounded-xl justify-between border border-zinc-200'
         onLongPress={() => onLongPressOperacao(itemCompleto.id)}
       >
         <View className='flex-row items-center'>
           <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
             <Image
-              source={itemCompleto.logourl}
+              source={itemCompleto.logo_url}
               style={{ width: 40, height: 40 }}
               contentFit="contain"
               transition={200}
@@ -90,8 +94,14 @@ export default function HomeScreen() {
 
           <View>
             <Text className='text-amber-600 text-2xl'>{itemCompleto.ticker}</Text>
-            <Text className='text-zinc-400 text-sm'>Compra {itemCompleto.qnt_papeis} | {itemCompleto.valor_compra}</Text>
+            <Text className='text-zinc-400 text-sm'>Compra {itemCompleto.qnt_papeis}  |  {itemCompleto.valor_compra}</Text>
           </View>
+        </View>
+        <View className='items-end justify-center'>
+          <Text className='text-amber-600 text-2xl'>{itemCompleto.cotacaoAtual}</Text>
+          <Text className={`text-sm ${itemCompleto.variacao >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            R$ {itemCompleto.variacao}   {itemCompleto.variacaoPercent}%
+          </Text>
         </View>
       </Pressable>
     );

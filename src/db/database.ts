@@ -5,6 +5,8 @@ const db = SQLite.openDatabaseSync("caronte.db");
 export interface Operacao {
   id: number;
   ticker: string;
+  nome: string;
+  logo_url: string;
   qnt_papeis: number;
   data_compra: string;
   valor_compra: number;
