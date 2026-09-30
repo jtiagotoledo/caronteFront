@@ -14,6 +14,10 @@ export interface Operacao {
   valor_venda: number | null;
 }
 
+export interface TotalInvestido{
+    total_investido: number | null;
+}
+
 export function iniciarBanco() {
     db.execSync(`
     CREATE TABLE IF NOT EXISTS operacoes (
@@ -64,4 +68,11 @@ export function buscarOperacoes(): Operacao[] {
     return db.getAllSync<Operacao>(
         "SELECT * FROM operacoes ORDER BY id DESC;",
     );
+}
+
+export function buscarTotalInvestido(): number {
+    const resultado = db.getFirstSync<TotalInvestido>(
+        "SELECT SUM(qnt_papeis*valor_compra) AS total_investido FROM operacoes WHERE data_venda IS null;"
+    );
+    return resultado?.total_investido ?? 0;
 }

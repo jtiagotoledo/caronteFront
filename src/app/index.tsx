@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
-import { iniciarBanco, buscarOperacoes, deletarOperacao, Operacao } from '@/db/database';
+import { iniciarBanco, buscarOperacoes, deletarOperacao, buscarTotalInvestido, TotalInvestido, Operacao } from '@/db/database';
 import { obterInfoTicker } from '../services/brapiService'
 
 export default function HomeScreen() {
@@ -22,12 +22,16 @@ export default function HomeScreen() {
   const [cotacoes, setCotacoes] = useState<Record<string, CotacaoInfo>>({});
   const [_, setNaoExisteTicker] = useState(false);
   const [operacoes, setOperacoes] = useState<Operacao[]>([]);
+  const [totalInvestido, setTotalInvestido] = useState<number>(0);
 
   useEffect(() => {
     async function carregarDados() {
       iniciarBanco();
       const operacoes = buscarOperacoes();
       setOperacoes(operacoes);
+      const total = buscarTotalInvestido();
+      
+      setTotalInvestido(total);
 
       let cotacoes: Record<string, CotacaoInfo> = {}
       for (const op of operacoes) {
@@ -131,6 +135,9 @@ export default function HomeScreen() {
       </View>
 
       {/* componente */}
+      <View className='bg-zinc-200 h-20 w-full p-4 '>
+        <Text>Total Investido : R$ {totalInvestido.toString().replace('.',',')}</Text>
+      </View>
       <FlatList
         data={operacoes}
         keyExtractor={(item) => item.id.toString()}
