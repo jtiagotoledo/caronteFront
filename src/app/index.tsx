@@ -1,4 +1,4 @@
-import { View, Text, TouchableWithoutFeedback, FlatList, Pressable, Alert } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, FlatList, Pressable, Alert, Modal } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [_, setNaoExisteTicker] = useState(false);
   const [operacoes, setOperacoes] = useState<Operacao[]>([]);
   const [totalInvestido, setTotalInvestido] = useState<number>(0);
+  const [modalVisivel, setModalVisivel] = useState<boolean>(false);
 
   useEffect(() => {
     async function carregarDados() {
@@ -30,7 +31,7 @@ export default function HomeScreen() {
       const operacoes = buscarOperacoes();
       setOperacoes(operacoes);
       const total = buscarTotalInvestido();
-      
+
       setTotalInvestido(total);
 
       let cotacoes: Record<string, CotacaoInfo> = {}
@@ -85,6 +86,7 @@ export default function HomeScreen() {
       <Pressable
         className='flex-row bg-white h-28 w-full px-4 mb-2 rounded-xl justify-between border border-zinc-200'
         onLongPress={() => onLongPressOperacao(itemCompleto.id)}
+        onPress={() => setModalVisivel(true)}
       >
         <View className='flex-row items-center'>
           <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
@@ -136,7 +138,7 @@ export default function HomeScreen() {
 
       {/* componente */}
       <View className='bg-zinc-200 h-20 w-full p-4 '>
-        <Text>Total Investido : R$ {totalInvestido.toString().replace('.',',')}</Text>
+        <Text>Total Investido : R$ {totalInvestido.toString().replace('.', ',')}</Text>
       </View>
       <FlatList
         data={operacoes}
@@ -144,6 +146,23 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
         renderItem={({ item }) => rendeItemOperacao(item, cotacoes)}
       />
+      <Modal
+        animationType='fade'
+        transparent={true}
+        visible={modalVisivel}
+        onRequestClose={() => { setModalVisivel(false) }}
+      >
+        <View className='flex-1 justify-center bg-black/50 px-4'>
+          <View className='bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl '>
+            <Text className='text-xl m-6'>
+              Resumo da operação
+            </Text>
+            <Pressable onPress={()=>setModalVisivel(false)}>
+              <Text>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
