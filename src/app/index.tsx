@@ -7,13 +7,15 @@ import { Image } from 'expo-image';
 
 import { iniciarBanco, buscarOperacoes, deletarOperacao, buscarTotalInvestido, TotalInvestido, Operacao } from '@/db/database';
 import { obterInfoTicker } from '../services/brapiService'
+import { buscarCotacao } from '../services/api'
+import { Button } from 'expo-router/build/react-navigation';
 
 export default function HomeScreen() {
 
   interface CotacaoInfo {
     cotacaoAtual: number;
     variacao: number;
-    variacaoPercent: number;
+    variacaoPercentual: number;
   }
 
   const router = useRouter();
@@ -41,7 +43,7 @@ export default function HomeScreen() {
           cotacoes[op.ticker] = {
             cotacaoAtual: cotacao.data.regularMarketPrice,
             variacao: cotacao.data.regularMarketChange,
-            variacaoPercent: cotacao.data.regularMarketChangePercent,
+            variacaoPercentual: cotacao.data.regularMarketChangePercent,
           }
         }
       }
@@ -77,7 +79,7 @@ export default function HomeScreen() {
       ...item,
       cotacaoAtual: cotacao?.cotacaoAtual,
       variacao: cotacao?.variacao,
-      variacaoPercent: cotacao?.variacaoPercent,
+      variacaoPercentual: cotacao?.variacaoPercentual,
     }
     console.log('itemCompleto', itemCompleto);
 
@@ -106,7 +108,7 @@ export default function HomeScreen() {
         <View className='items-end justify-center'>
           <Text className='text-amber-600 text-2xl'>{itemCompleto.cotacaoAtual}</Text>
           <Text className={`text-sm ${itemCompleto.variacao >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            R$ {itemCompleto.variacao}   {itemCompleto.variacaoPercent}%
+            R$ {itemCompleto.variacao}   {itemCompleto.variacaoPercentual}%
           </Text>
         </View>
       </Pressable>
@@ -139,6 +141,7 @@ export default function HomeScreen() {
       {/* componente */}
       <View className='bg-zinc-200 h-20 w-full p-4 '>
         <Text>Total Investido : R$ {totalInvestido.toString().replace('.', ',')}</Text>
+        <Button onPressIn={()=>buscarCotacao('petr4.sa')}>Cotação</Button>
       </View>
       <FlatList
         data={operacoes}
