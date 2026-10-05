@@ -91,7 +91,7 @@ export default function HomeScreen() {
         <View className='flex-row items-center'>
           <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
             <Image
-              source={itemCompleto.logo_url}
+              source={`https://caronte.solardev.dpdns.org/api/logos/${itemCompleto.ticker.replace(/[0-9.].*$/,'')}.png`}
               style={{ width: 40, height: 40 }}
               contentFit="contain"
               transition={200}
