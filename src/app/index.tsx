@@ -64,7 +64,7 @@ export default function HomeScreen() {
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
     const dados = await obterInfoTicker(ticker);
-    console.log('dados', dados);
+    //console.log('dados', dados);
 
     if (!dados) {
       setNaoExisteTicker(true);
@@ -81,7 +81,7 @@ export default function HomeScreen() {
       variacao: cotacao?.variacao,
       variacaoPercentual: cotacao?.variacaoPercentual,
     }
-    console.log('itemCompleto', itemCompleto);
+    //('itemCompleto', itemCompleto);
 
 
     return (
@@ -93,7 +93,7 @@ export default function HomeScreen() {
         <View className='flex-row items-center'>
           <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
             <Image
-              source={`https://caronte.solardev.dpdns.org/api/logos/${itemCompleto.ticker.replace(/[0-9.].*$/,'')}.png`}
+              source={`https://caronte.solardev.dpdns.org/api/logos/${itemCompleto.ticker.replace(/[0-9.].*$/, '')}.png`}
               style={{ width: 40, height: 40 }}
               contentFit="contain"
               transition={200}
@@ -141,7 +141,7 @@ export default function HomeScreen() {
       {/* componente */}
       <View className='bg-zinc-200 h-20 w-full p-4 '>
         <Text>Total Investido : R$ {totalInvestido.toString().replace('.', ',')}</Text>
-        <Button onPressIn={()=>buscarCotacao('petr4.sa')}>Cotação</Button>
+        <Button onPressIn={() => buscarCotacao('petr4.sa')}>Cotação</Button>
       </View>
       <FlatList
         data={operacoes}
@@ -160,7 +160,7 @@ export default function HomeScreen() {
             <Text className='text-xl m-6'>
               Resumo da operação
             </Text>
-            <Pressable onPress={()=>setModalVisivel(false)}>
+            <Pressable onPress={() => setModalVisivel(false)}>
               <Text>Fechar</Text>
             </Pressable>
           </View>

@@ -6,8 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 
 import { salvarOperacao, } from '@/db/database';
-import { pesquisaPorTicker, ItemPesquisa } from '../services/brapiService'
+import { buscarAtivo } from '../services/api'
 import { CampoData } from "../components/campoData";
+
+interface ItemPesquisa {
+  ticker: string;
+  nome: string;
+  logoUrl: string;
+}
 
 export default function HomeScreen() {
 
@@ -21,15 +27,15 @@ export default function HomeScreen() {
   const [dataOperacao, setDataOperacao] = useState(new Date());
   const [dataBanco, setDataBanco] = useState(new Date().toISOString().split("T")[0]);
 
-  const salvarNoBanco = async (ticker: string, nome:string, logoUrl:string, quantidade: string, dataCompra: string, valorCompra: string) => {
-    
-    if(quantidade===''||valorCompra===''){
+  const salvarNoBanco = async (ticker: string, nome: string, logoUrl: string, quantidade: string, dataCompra: string, valorCompra: string) => {
+
+    if (quantidade === '' || valorCompra === '') {
       Alert.alert('A quantidade de papéis e o preço são obrigatórios!');
       return;
     }
 
     const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
-    
+
     const salvarOk = salvarOperacao(ticker.toUpperCase(), nome, logoUrl, parseInt(quantidade), dataCompra, valorCompraNormatizado);
     if (salvarOk) {
       Alert.alert('Operação salva com sucesso.');
@@ -41,7 +47,7 @@ export default function HomeScreen() {
   }
 
   const onChangeTicker = async (tickerSearch: string) => {
-    const resultadoPesquisa = await pesquisaPorTicker(tickerSearch);
+    const resultadoPesquisa = await buscarAtivo(tickerSearch);
     setListaTickers(resultadoPesquisa);
   }
 
@@ -145,8 +151,6 @@ export default function HomeScreen() {
             aoMudarData={(formatoBanco, objetoData) => {
               setDataBanco(formatoBanco);
               setDataOperacao(objetoData);
-              console.log('formatoBanco,objetoData',formatoBanco,objetoData);
-              
             }}
           />
 
