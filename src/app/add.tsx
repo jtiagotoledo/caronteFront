@@ -8,11 +8,32 @@ import { Image } from 'expo-image';
 import { salvarOperacao, } from '@/db/database';
 import { buscarAtivo } from '../services/api'
 import { CampoData } from "../components/campoData";
+import iconeFallback from '@/assets/images/caronte_invest_claro.png';
 
 interface ItemPesquisa {
   ticker: string;
   nome: string;
-  logoUrl: string;
+}
+
+interface LogoAtivoProps {
+  ticker: string;
+  tamanho?: number;
+}
+
+function LogoAtivo({ ticker, tamanho = 40 }: LogoAtivoProps) {
+  const tickerLimpo = ticker.replace(/[0-9.].*$/, '');
+  const urlLogoOriginal = `https://caronte.solardev.dpdns.org/api/logos/${tickerLimpo}.png`;
+
+  const [fonteImagem, setFonteImagem] = useState<any>(urlLogoOriginal);
+
+  return (
+    <Image
+      source={fonteImagem}
+      style={{ width: tamanho, height: tamanho }}
+      contentFit="contain"
+      onError={() => setFonteImagem(iconeFallback)}
+    />
+  );
 }
 
 export default function HomeScreen() {
@@ -27,7 +48,7 @@ export default function HomeScreen() {
   const [dataOperacao, setDataOperacao] = useState(new Date());
   const [dataBanco, setDataBanco] = useState(new Date().toISOString().split("T")[0]);
 
-  const salvarNoBanco = async (ticker: string, nome: string, logoUrl: string, quantidade: string, dataCompra: string, valorCompra: string) => {
+  const salvarNoBanco = async (ticker: string, nome: string, quantidade: string, dataCompra: string, valorCompra: string) => {
 
     if (quantidade === '' || valorCompra === '') {
       Alert.alert('A quantidade de papéis e o preço são obrigatórios!');
@@ -36,7 +57,7 @@ export default function HomeScreen() {
 
     const valorCompraNormatizado = parseFloat(valorCompra.replace(',', '.'));
 
-    const salvarOk = salvarOperacao(ticker.toUpperCase(), nome, logoUrl, parseInt(quantidade), dataCompra, valorCompraNormatizado);
+    const salvarOk = salvarOperacao(ticker.toUpperCase(), nome, parseInt(quantidade), dataCompra, valorCompraNormatizado);
     if (salvarOk) {
       Alert.alert('Operação salva com sucesso.');
     } else {
@@ -56,17 +77,14 @@ export default function HomeScreen() {
   }
 
   const rendeItemPesquisa = (item: ItemPesquisa) => {
+
     return (
       <Pressable
         className="bg-white p-3 mb-2 rounded-xl border border-zinc-200 flex-row items-center"
         onPress={() => selecionarTicker(item)}
       >
-        <View className="w-10 h-20 mr-3 items-center justify-center overflow-hidden">
-          <Image
-            source={item.logoUrl}
-            style={{ width: 40, height: 40 }}
-            contentFit="contain"
-          />
+        <View className="w-10 h-10 mr-3 items-center justify-center overflow-hidden">
+          <LogoAtivo ticker={item.ticker} tamanho={40} />
         </View>
 
         <View className="flex-1 justify-center">
@@ -132,12 +150,8 @@ export default function HomeScreen() {
       {ticker &&
 
         <View className="flex-1 items-center bg-zinc-100 p-4">
-          <View className="w-24 h-24 items-center justify-center overflow-hidden mb-4">
-            <Image
-              source={ticker.logoUrl}
-              style={{ width: 80, height: 80 }}
-              contentFit="contain"
-            />
+          <View className="w-24 h-24 items-center justify-center overflow-hidden my-4">
+            <LogoAtivo ticker={ticker.ticker} tamanho={80} />
           </View>
           <View className="justify-center mb-10">
             <Text className="text-2xl font-bold text-amber-600">
@@ -170,7 +184,7 @@ export default function HomeScreen() {
             inputMode='numeric'
           />
 
-          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, ticker.nome, ticker.logoUrl, quantidade, dataBanco, valorCompra)}>
+          <TouchableHighlight onPress={() => salvarNoBanco(ticker.ticker, ticker.nome, quantidade, dataBanco, valorCompra)}>
             <Text className='bg-slate-900 rounded-md text-sm text-white p-4 mt-8'>
               SALVAR OPERAÇÃO
             </Text>

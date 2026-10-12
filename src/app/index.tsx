@@ -9,6 +9,7 @@ import { iniciarBanco, buscarOperacoes, deletarOperacao, buscarTotalInvestido, T
 import { obterInfoTicker } from '../services/brapiService'
 import { buscarCotacao } from '../services/api'
 import { Button } from 'expo-router/build/react-navigation';
+import iconeFallback from '@/assets/images/caronte_invest_claro.png';
 
 export default function HomeScreen() {
 
@@ -16,6 +17,26 @@ export default function HomeScreen() {
     cotacaoAtual: number;
     variacao: number;
     variacaoPercentual: number;
+  }
+  interface LogoAtivoProps {
+    ticker: string;
+    tamanho?: number;
+  }
+
+  function LogoAtivo({ ticker, tamanho = 40 }: LogoAtivoProps) {
+    const tickerLimpo = ticker.replace(/[0-9.].*$/, '');
+    const urlLogoOriginal = `https://caronte.solardev.dpdns.org/api/logos/${tickerLimpo}.png`;
+
+    const [fonteImagem, setFonteImagem] = useState<any>(urlLogoOriginal);
+
+    return (
+      <Image
+        source={fonteImagem}
+        style={{ width: tamanho, height: tamanho }}
+        contentFit="contain"
+        onError={() => setFonteImagem(iconeFallback)}
+      />
+    );
   }
 
   const router = useRouter();
@@ -92,12 +113,7 @@ export default function HomeScreen() {
       >
         <View className='flex-row items-center'>
           <View className="mr-4 w-10 h-10 items-center justify-center overflow-hidden">
-            <Image
-              source={`https://caronte.solardev.dpdns.org/api/logos/${itemCompleto.ticker.replace(/[0-9.].*$/, '')}.png`}
-              style={{ width: 40, height: 40 }}
-              contentFit="contain"
-              transition={200}
-            />
+            <LogoAtivo ticker={itemCompleto.ticker} tamanho={40} />
           </View>
 
           <View>

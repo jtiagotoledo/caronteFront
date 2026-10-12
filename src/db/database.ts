@@ -3,18 +3,18 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabaseSync("caronte.db");
 
 export interface Operacao {
-  id: number;
-  ticker: string;
-  nome: string;
-  logo_url: string;
-  qnt_papeis: number;
-  data_compra: string;
-  valor_compra: number;
-  data_venda: string | null;
-  valor_venda: number | null;
+    id: number;
+    ticker: string;
+    nome: string;
+    logo_url: string;
+    qnt_papeis: number;
+    data_compra: string;
+    valor_compra: number;
+    data_venda: string | null;
+    valor_venda: number | null;
 }
 
-export interface TotalInvestido{
+export interface TotalInvestido {
     total_investido: number | null;
 }
 
@@ -42,12 +42,12 @@ export function iniciarBanco() {
     `);
 }
 
-export function salvarOperacao(ticker: string, nome:string, logo_url:string, quantidade: number, dataCompra: string, valorCompra: number) {
+export function salvarOperacao(ticker: string, nome: string, quantidade: number, dataCompra: string, valorCompra: number) {
     const resultado = db.runSync(
-        "INSERT INTO operacoes(ticker, nome, logo_url, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?, ?, ?);",
-        [ticker, nome, logo_url, quantidade, dataCompra, valorCompra]
+        "INSERT INTO operacoes(ticker, nome, logo_url, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?, ?);",
+        [ticker, nome, quantidade, dataCompra, valorCompra]
     );
-    return resultado.changes>0;
+    return resultado.changes > 0;
 }
 
 export function alterarOperacao(id: string, ticker: string, quantidade: number, dataCompra: string, valorCompra: number) {
@@ -55,13 +55,13 @@ export function alterarOperacao(id: string, ticker: string, quantidade: number, 
         "UPDATE operacoes SET ticker = ?, qnt_papeis = ?, data_compra = ?, valor_compra = ? WHERE id = ?",
         [ticker, quantidade, dataCompra, valorCompra, id]
     );
-    return resultado.changes>0;
+    return resultado.changes > 0;
 }
 
 export function deletarOperacao(id: number) {
     db.runSync("PRAGMA foreign_keys = ON;")
     const resultado = db.runSync("DELETE FROM operacoes WHERE id= ? ;", [id]);
-    return resultado.changes>0;
+    return resultado.changes > 0;
 }
 
 export function buscarOperacoes(): Operacao[] {
