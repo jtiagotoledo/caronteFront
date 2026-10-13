@@ -8,6 +8,7 @@ import { Image } from 'expo-image';
 import { iniciarBanco, buscarOperacoes, deletarOperacao, buscarTotalInvestido, TotalInvestido, Operacao } from '@/db/database';
 import { buscarCotacao } from '../services/api'
 import iconeFallback from '@/assets/images/caronte_invest_claro.png';
+import { ModalResumo } from '@/components/ModalResumo';
 
 export default function HomeScreen() {
 
@@ -161,24 +162,10 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
         renderItem={({ item }) => rendeItemOperacao(item, cotacoes)}
       />
-      <Modal
-        animationType='fade'
-        transparent={true}
+      <ModalResumo
         visible={modalVisivel}
-        onRequestClose={() => { setModalVisivel(false) }}
-      >
-        <View className='flex-1 justify-center bg-black/50 px-4'>
-          <View className='bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl '>
-            <Text className='text-xl m-6'>
-              Resumo da operação
-            </Text>
-            <Pressable onPress={() => setModalVisivel(false)}>
-              <Text>Fechar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
+        onClose={() => { setModalVisivel(false) }}
+      />
     </View>
   );
 }
