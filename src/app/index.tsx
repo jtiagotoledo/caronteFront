@@ -6,15 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 import { iniciarBanco, buscarOperacoes, deletarOperacao, buscarTotalInvestido, TotalInvestido, Operacao } from '@/db/database';
-import { obterInfoTicker } from '../services/brapiService'
 import { buscarCotacao } from '../services/api'
-import { Button } from 'expo-router/build/react-navigation';
 import iconeFallback from '@/assets/images/caronte_invest_claro.png';
-
-interface LogoAtivoProps {
-  ticker: string;
-  tamanho?: number;
-}
 
 export default function HomeScreen() {
 
@@ -67,9 +60,9 @@ export default function HomeScreen() {
         const cotacao = await pegarCotacao(op.ticker);
         if (cotacao) {
           cotacoes[op.ticker] = {
-            cotacaoAtual: cotacao.data.regularMarketPrice,
-            variacao: cotacao.data.regularMarketChange,
-            variacaoPercentual: cotacao.data.regularMarketChangePercent,
+            cotacaoAtual: cotacao.preco,
+            variacao: Math.round(cotacao.variacao * 100) / 100,
+            variacaoPercentual: Math.round(cotacao.variacaoPercentual * 100) / 100,
           }
         }
       }
@@ -89,8 +82,8 @@ export default function HomeScreen() {
 
   const pegarCotacao = async (ticker: string) => {
     setNaoExisteTicker(false)
-    const dados = await obterInfoTicker(ticker);
-    //console.log('dados', dados);
+    const dados = await buscarCotacao(ticker);
+    console.log('dados', dados);
 
     if (!dados) {
       setNaoExisteTicker(true);
@@ -161,7 +154,6 @@ export default function HomeScreen() {
       {/* componente */}
       <View className='bg-zinc-200 h-20 w-full p-4 '>
         <Text>Total Investido : R$ {totalInvestido.toString().replace('.', ',')}</Text>
-        <Button onPressIn={() => buscarCotacao('petr4.sa')}>Cotação</Button>
       </View>
       <FlatList
         data={operacoes}
