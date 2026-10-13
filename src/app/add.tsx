@@ -41,6 +41,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const [textoPesq, setTextoPesq] = useState('');
   const [ticker, setTicker] = useState<ItemPesquisa | null>(null);
   const [quantidade, setQuantidade] = useState('');
   const [valorCompra, setValorCompra] = useState('');
@@ -67,8 +68,8 @@ export default function HomeScreen() {
 
   }
 
-  const onChangeTicker = async (tickerSearch: string) => {
-    const resultadoPesquisa = await buscarAtivo(tickerSearch);
+  const pesquisarTickers = async () => {
+    const resultadoPesquisa = await buscarAtivo(textoPesq);
     setListaTickers(resultadoPesquisa);
   }
 
@@ -133,10 +134,16 @@ export default function HomeScreen() {
             <TextInput
               className='flex-1 text-2xl text-amber-600'
               placeholder='Digite o tiker aqui'
-              onChangeText={(text) => onChangeTicker(text)}
+              onChangeText={(text) => setTextoPesq(text)}
               keyboardType="visible-password"
             />
-
+            {textoPesq!=='' &&(
+              <Pressable
+                onPress={() => pesquisarTickers()}
+              >
+                <Ionicons name='send' size={30} color='black' className='mr-4' />
+              </Pressable>
+            )}
           </View>
           <FlatList
             data={listaTickers}
@@ -147,8 +154,8 @@ export default function HomeScreen() {
         </View>
       }
 
-      {ticker &&
-
+      {
+        ticker &&
         <View className="flex-1 items-center bg-zinc-100 p-4">
           <View className="w-24 h-24 items-center justify-center overflow-hidden my-4">
             <LogoAtivo ticker={ticker.ticker} tamanho={80} />
@@ -192,7 +199,7 @@ export default function HomeScreen() {
 
         </View>
       }
-    </View>
+    </View >
   );
 }
 

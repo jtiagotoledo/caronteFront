@@ -6,7 +6,6 @@ export interface Operacao {
     id: number;
     ticker: string;
     nome: string;
-    logo_url: string;
     qnt_papeis: number;
     data_compra: string;
     valor_compra: number;
@@ -24,7 +23,6 @@ export function iniciarBanco() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ticker TEXT NOT NULL,
         nome TEXT,
-        logo_url TEXT,
         qnt_papeis INTEGER NOT NULL,
         data_compra TEXT NOT NULL,
         valor_compra REAL NOT NULL,
@@ -44,7 +42,7 @@ export function iniciarBanco() {
 
 export function salvarOperacao(ticker: string, nome: string, quantidade: number, dataCompra: string, valorCompra: number) {
     const resultado = db.runSync(
-        "INSERT INTO operacoes(ticker, nome, logo_url, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?, ?);",
+        "INSERT INTO operacoes(ticker, nome, qnt_papeis, data_compra, valor_compra) VALUES (?, ?, ?, ?, ?);",
         [ticker, nome, quantidade, dataCompra, valorCompra]
     );
     return resultado.changes > 0;
@@ -74,5 +72,6 @@ export function buscarTotalInvestido(): number {
     const resultado = db.getFirstSync<TotalInvestido>(
         "SELECT SUM(qnt_papeis*valor_compra) AS total_investido FROM operacoes WHERE data_venda IS null;"
     );
-    return resultado?.total_investido ?? 0;
+    const total = resultado?.total_investido ?? 0;
+    return Math.round(total * 100) / 100;
 }

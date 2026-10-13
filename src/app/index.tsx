@@ -11,6 +11,11 @@ import { buscarCotacao } from '../services/api'
 import { Button } from 'expo-router/build/react-navigation';
 import iconeFallback from '@/assets/images/caronte_invest_claro.png';
 
+interface LogoAtivoProps {
+  ticker: string;
+  tamanho?: number;
+}
+
 export default function HomeScreen() {
 
   interface CotacaoInfo {
@@ -102,7 +107,6 @@ export default function HomeScreen() {
       variacao: cotacao?.variacao,
       variacaoPercentual: cotacao?.variacaoPercentual,
     }
-    //('itemCompleto', itemCompleto);
 
 
     return (
